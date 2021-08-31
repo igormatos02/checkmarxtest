@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="10.3.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\crosscutting.checkmarx\crosscutting.checkmarx.csproj" />
+    <ProjectReference Include="..\domain.checkmarx\domain.checkmarx.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\UpdateOrderStatus\" />
+  </ItemGroup>
+
+</Project>

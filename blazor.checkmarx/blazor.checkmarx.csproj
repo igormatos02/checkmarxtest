@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\application.checkmarx\application.checkmarx.csproj" />
+    <ProjectReference Include="..\persistence.checkmarx\persistence.checkmarx.csproj" />
+    <ProjectReference Include="..\services.checkmarxs\services.checkmarxs.csproj" />
+  </ItemGroup>
+
+</Project>

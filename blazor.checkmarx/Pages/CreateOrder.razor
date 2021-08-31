@@ -1,0 +1,76 @@
+﻿@page "/CreateOrder"
+@using application.checkmarx.Commands.AddOrder
+@using application.checkmarx
+@using application.checkmarx.Queries
+@using application.checkmarx.DisplayModels;
+@using services.checkmarxs
+@inject ICommandHandler<AddOrderCommand> addCommandHandler
+@inject IQueryHandler<GetDishesQuery> getDishesQuery
+@inject IRabbitMQService RabbitMQService
+<h1>Counter</h1>
+
+<p>Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Clean Order</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Add new Order</button>
+
+<table>
+     <tr>
+        <td>Waiter Id</td>
+        <td><input /></td>
+    </tr>
+    <tr>
+        <td>Table Number</td>
+        <td>
+            <select>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+            </select>
+        </td>
+    </tr>
+     <tr>
+          <td colspan="2">
+              <table>
+                  <tr>
+                      <td valign="top">
+                          Dishes
+                          <table>
+                              <tr></tr>
+                          </table>
+                      </td>
+                      <td valign="top">
+                          @if (dishes!= null) { 
+                              @foreach(var d in dishes) {
+                                 var dish = (DishDisplay)d;
+                                  
+                              <button>Add @dish.Description</button>
+                              }
+                           }
+                      </td>
+                  </tr>
+              </table>
+          </td>
+    </tr>
+</table>
+
+
+@code {
+    private int currentCount = 0;
+    private IList<IResult> dishes;
+     protected override async Task OnInitializedAsync()
+    {
+        dishes = getDishesQuery.Handle(new GetDishesQuery());
+    }
+     
+    private void IncrementCount()
+    {
+        currentCount++;
+        RabbitMQService.Connect();
+       
+      
+        //addCommandHandler.Handle(new AddOrderCommand() { });
+    }
+}

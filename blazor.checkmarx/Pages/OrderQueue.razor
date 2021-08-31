@@ -1,0 +1,47 @@
+﻿@page "/OrderQueue"
+@using application.checkmarx.Commands.AddOrder
+@using application.checkmarx
+@using application.checkmarx.Queries
+@using application.checkmarx.DisplayModels;
+@using services.checkmarxs
+@using crosscutting.checkmarx.Enums;
+@inject ICommandHandler<AddOrderCommand> addCommandHandler
+@inject IQueryHandler<GetOrderQueueQuery> getOrderQuery
+@inject IRabbitMQService RabbitMQService
+<h1>Counter</h1>
+
+<p>Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Clean Order</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Add new Order</button>
+
+<table>
+     @if (orders!= null) { 
+        @foreach(var o in orders) {
+            var order = (OrderDisplay)o;
+                <tr>
+                <td>@order.TableNumber</td>
+                <td><button>Take Order</button></td>
+            </tr>
+            }
+        }
+</table>
+
+
+@code {
+    private int currentCount = 0;
+    private IList<IResult> orders;
+    protected override async Task OnInitializedAsync()
+    {
+        orders = getOrderQuery.Handle(new GetOrderQueueQuery() { Status = OrderStatus.SentToKitchen});
+    }
+
+    private void IncrementCount()
+    {
+        currentCount++;
+        RabbitMQService.Connect();
+
+
+        //addCommandHandler.Handle(new AddOrderCommand() { });
+    }
+}
