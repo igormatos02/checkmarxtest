@@ -8,7 +8,7 @@ namespace application.checkmarx.Commands
 {
     public class ChangeOrderStatusCommand : ICommand
     {
-        public string OrderId { get; set; }
+        public Guid OrderId { get; set; }
         public OrderStatus Status { get; set; }
     }
 }

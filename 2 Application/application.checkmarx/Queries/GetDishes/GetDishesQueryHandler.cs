@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace application.checkmarx.Queries
 {
@@ -15,7 +16,7 @@ namespace application.checkmarx.Queries
             _context = context;
         }
 
-        public IList<IResult> Handle(GetDishesQuery query)
+        public async Task<IList<IResult>> Handle(GetDishesQuery query)
         {
             var dishes = _context.Dishes.ToList();
             if (dishes == null)
@@ -34,7 +35,7 @@ namespace application.checkmarx.Queries
                 results.Add(dish);
 
             }
-            return results;
+            return await Task.FromResult(results);
         }
     }
 }

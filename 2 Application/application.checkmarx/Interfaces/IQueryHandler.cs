@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace application.checkmarx
 {
@@ -8,6 +9,6 @@ namespace application.checkmarx
     { }
     public interface IQueryHandler<T> : IQueryHandler where T : IQuery
     {
-        IList<IResult> Handle(T query);
+        Task<IList<IResult>> Handle(T query);
     }
 }

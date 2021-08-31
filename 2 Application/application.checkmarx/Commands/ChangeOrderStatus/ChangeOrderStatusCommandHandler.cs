@@ -36,7 +36,7 @@ namespace application.checkmarx.Commands
 
           
 
-            var order  = _context.Orders.Where(x=>x.OrderId.ToString() == command.OrderId).FirstOrDefault();
+            var order  = _context.Orders.Where(x=>x.OrderId.ToString() == command.OrderId.ToString()).FirstOrDefault();
             if(order!= null)
             {
                 order.Status = command.Status;

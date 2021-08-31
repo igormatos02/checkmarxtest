@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using crosscutting.checkmarx.Enums;
+using System.Threading.Tasks;
 
 namespace application.checkmarx.Queries
 {
@@ -15,9 +17,9 @@ namespace application.checkmarx.Queries
             _context = context;
         }
 
-        public IList<IResult> Handle(GetOrderQueueQuery query)
+        public async Task<IList<IResult>> Handle(GetOrderQueueQuery query)
         {
-            var orders = _context.Orders.Where(p => p.Status == query.Status).OrderByDescending(x=>x.CreationDate).ToList();
+            var orders = _context.Orders.Where(p => p.Status == OrderStatus.Preparing || p.Status == OrderStatus.SentToKitchen).OrderByDescending(x=>x.CreationDate).ToList();
             if (orders == null)
                 return null;
 
@@ -28,6 +30,7 @@ namespace application.checkmarx.Queries
                 {
                     OrderId = p.OrderId,
                     WaiterId = p.WaiterId,
+                    ChefId = p.ChefId,
                     Status = p.Status,
                     TableNumber = p.TableNumber,
                     Dishes = p.Dishes,
@@ -36,7 +39,8 @@ namespace application.checkmarx.Queries
                 results.Add(order);
 
             }
-            return results;
+            return await Task.FromResult(results);
+           
         }
     }
 }

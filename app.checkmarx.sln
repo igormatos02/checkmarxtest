@@ -26,6 +26,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D9EEAD2F-A038-47C4-AAEF-1892891FDD19}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\Users\Igor Matos\Desktop\DeliveringSequence.png = ..\..\..\Users\Igor Matos\Desktop\DeliveringSequence.png
+		..\..\..\Users\Igor Matos\Desktop\Entities.png = ..\..\..\Users\Igor Matos\Desktop\Entities.png
 		..\..\..\Users\Igor Matos\Desktop\Ordering Sequence.png = ..\..\..\Users\Igor Matos\Desktop\Ordering Sequence.png
 		..\..\..\Users\Igor Matos\Desktop\Preparing Sequence.png = ..\..\..\Users\Igor Matos\Desktop\Preparing Sequence.png
 		..\..\..\Users\Igor Matos\Desktop\The Restaurant - SA.docx = ..\..\..\Users\Igor Matos\Desktop\The Restaurant - SA.docx

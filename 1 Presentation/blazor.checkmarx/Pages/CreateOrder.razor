@@ -4,22 +4,21 @@
 @using application.checkmarx.Queries
 @using application.checkmarx.DisplayModels;
 @using services.checkmarxs
+@using crosscutting.checkmarx.Enums
 @inject ICommandHandler<AddOrderCommand> addCommandHandler
 @inject IQueryHandler<GetDishesQuery> getDishesQuery
 @inject IQueryHandler<GetChefsQuery>  getChefsQuery
 @inject IQueryHandler<GetWaitersQuery>  getWaitersQuery
 @inject IRabbitMQService RabbitMQService
-<h1>Counter</h1>
-
-<p>Current count: @currentCount</p>
+<h1>Create Order Screen</h1>
 
 <button class="btn btn-primary"  @onclick="NewOrder">Clean Order</button>
-<button class="btn btn-primary" @onclick="SaveOrder">Save Order</button>
+<button class="btn btn-primary" @onclick="SaveOrder">Create Order</button>
 
 <table>
      <tr>
         <td>Waiter</td>
-        <td> <select>
+        <td> <select  @bind="currentOrder.WaiterId">
                 @if (waiters != null) {
                     @foreach (var d in waiters)
                     {   
@@ -33,7 +32,7 @@
     <tr>
         <td>Table Number</td>
         <td>
-            <select>
+            <select  @bind="currentOrder.TableNumber">
                 <option>1</option>
                 <option>2</option>
                 <option>3</option>
@@ -77,14 +76,14 @@
 
 
 @code {
-    private int currentCount = 0;
+  
     private IList<IResult> dishes;
     private IList<IResult> waiters;
     private AddOrderCommand currentOrder;
     protected override async Task OnInitializedAsync()
     {
-        dishes = getDishesQuery.Handle(new GetDishesQuery());
-        waiters = getWaitersQuery.Handle(new GetWaitersQuery());
+        dishes = await getDishesQuery.Handle(new GetDishesQuery());
+        waiters = await getWaitersQuery.Handle(new GetWaitersQuery());
         NewOrder();
     }
 
@@ -95,12 +94,18 @@
 
     private void NewOrder()
     {
-        currentOrder = new AddOrderCommand();
+        currentOrder = new AddOrderCommand()
+        {
+            Status = OrderStatus.None
+        };
     }
 
     private void SaveOrder()
     {
+        currentOrder.Status = OrderStatus.SentToKitchen;
+        currentOrder.CreationDate = DateTime.Now;
         addCommandHandler.Handle(currentOrder);
+        NewOrder();
        //RabbitMQService.Connect();
  
     }

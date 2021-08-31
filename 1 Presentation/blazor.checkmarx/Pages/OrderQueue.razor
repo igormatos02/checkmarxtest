@@ -1,47 +1,161 @@
 ﻿@page "/OrderQueue"
-@using application.checkmarx.Commands.AddOrder
+@using application.checkmarx.Commands
 @using application.checkmarx
 @using application.checkmarx.Queries
 @using application.checkmarx.DisplayModels;
 @using services.checkmarxs
-@using crosscutting.checkmarx.Enums;
-@inject ICommandHandler<AddOrderCommand> addCommandHandler
+@using crosscutting.checkmarx.Enums
+@inject ICommandHandler<ChangeOrderStatusCommand> changeOrderStatusHandler
+@inject IQueryHandler<GetDishesQuery> getDishesQuery
+@inject IQueryHandler<GetChefsQuery>  getChefsQuery
+@inject IQueryHandler<GetWaitersQuery>  getWaitersQuery
 @inject IQueryHandler<GetOrderQueueQuery> getOrderQuery
 @inject IRabbitMQService RabbitMQService
-<h1>Counter</h1>
+<h1>Order Queue Screen</h1>
 
-<p>Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Clean Order</button>
-<button class="btn btn-primary" @onclick="IncrementCount">Add new Order</button>
-
-<table>
-     @if (orders!= null) { 
-        @foreach(var o in orders) {
-            var order = (OrderDisplay)o;
+<table width="100%">
+    <tr>
+        <td>
+            <table>
                 <tr>
-                <td>@order.TableNumber</td>
-                <td><button>Take Order</button></td>
-            </tr>
+                    <td>Chef</td>
+                    <td> <select  @bind="chefId">
+                            @if (chefs != null) {
+                                @foreach (var d in chefs)
+                                {   
+                                    var chef = (ChefDisplay)d;
+                                    <option value="@chef.Id">@chef.Name</option>
+                                }
+                            }
+                        </select>
+                     </td>
+                </tr>
+                <tr>
+                    <td width="400px">
+                        @if (orders != null)
+                        { <table class="table">
+                            @foreach (var d in orders)
+                            {
+                                var order = (OrderDisplay)d;
+                                <tr>
+                                    <td>@order.TableNumber.ToString()</td>
+                                    <td>@order.CreationDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@order.Status.ToString()</td>
+                                    <td>
+                                        @if (order.CreationDate == orders.Min(x => ((OrderDisplay)x).CreationDate) && order.Status==OrderStatus.SentToKitchen) { 
+                                        <button  class="btn btn-primary" @onclick="()=>PrepareOrder(order)">Prepare</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                        }
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td>
+        @if (currentOrder != null)
+        {
+            TimeSpan preparationTime = new TimeSpan(0);
+
+            <table class="table table-striped" width="600px">
+                 <tr>
+                    <td>Id</td>
+                    <td>Description</td>
+                    <td>Price</td>
+                    <td>Preparation Time</td>
+                </tr>
+            @foreach (var d in currentOrder.Dishes)
+            {
+                var dish = @dishes.Select(x => (DishDisplay)x).Where(x => x.Id == d).FirstOrDefault();
+                if (dish.PreparationTime > preparationTime)
+                    preparationTime = dish.PreparationTime;
+                <tr>
+                    <td>@d</td>
+                    <td>@dish.Description</td>
+                    <td>@dish.Price</td>
+                    <td>@dish.PreparationTime.ToString()</td>
+                </tr>
             }
-        }
+            </table>
+             <table>
+                <tr>
+                    <td>Time to Prepare:</td>
+                    <td>@preparationTime</td>
+                </tr>
+                 <tr>
+                     @{
+                         var chief = chefs.Select(x => ((ChefDisplay)x)).Where(x => x.Id == chefId).FirstOrDefault();
+                     }
+                     @if (chief != null) { 
+                    <td>Chef:</td>
+                    <td>@chief.Name</td>
+                    }
+                </tr>
+                 <tr>
+                     @{
+                         var waiter = waiters.Select(x => ((WaiterDisplay)x)).Where(x => x.Id == currentOrder.WaiterId).FirstOrDefault();
+                     }
+                     @if (waiter != null) { 
+                    <td>Waiter:</td>
+                    <td>@waiter.Name</td>
+                    }
+                </tr>
+            </table>
+            <button class="btn btn-primary" @onclick="()=>DeliverOrder()">Deliver Order</button>
+            }
+        </td>
+    </tr>
 </table>
 
 
+
 @code {
-    private int currentCount = 0;
+
     private IList<IResult> orders;
+    private IList<IResult> chefs;
+    private IList<IResult> waiters;
+    private IList<IResult> dishes;
+    private OrderDisplay currentOrder;
+    private int chefId;
     protected override async Task OnInitializedAsync()
     {
-        orders = getOrderQuery.Handle(new GetOrderQueueQuery() { Status = OrderStatus.SentToKitchen});
+        orders = await getOrderQuery.Handle(new GetOrderQueueQuery() {});
+        chefs = await getChefsQuery.Handle(new GetChefsQuery());
+        dishes = await getDishesQuery.Handle(new GetDishesQuery());
+        waiters = await getWaitersQuery.Handle(new GetWaitersQuery());
     }
 
-    private void IncrementCount()
+
+
+    private void PrepareOrder(OrderDisplay order)
     {
-        currentCount++;
-        RabbitMQService.Connect();
+        order.Status = OrderStatus.Preparing;
+        currentOrder = order;
+        changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
+        {
+            OrderId = order.OrderId,
+            Status = OrderStatus.Preparing
+        });
 
 
-        //addCommandHandler.Handle(new AddOrderCommand() { });
+        //RabbitMQService.Connect();
+
+    }
+
+    private void DeliverOrder()
+    {
+        //order.Status = OrderStatus.Preparing;
+        //currentOrder = order;
+        //changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
+        //{
+        //    OrderId = order.OrderId,
+        //    Status = OrderStatus.Preparing
+        //});
+
+
+        //RabbitMQService.Connect();
+
     }
 }

@@ -9,7 +9,8 @@ namespace application.checkmarx.DisplayModels
     public class OrderDisplay : IResult
     {
         public Guid OrderId { get; set; }
-        public Guid WaiterId { get; set; }
+        public int WaiterId { get; set; }
+        public int ChefId { get; set; }
         public int TableNumber { get; set; }
         public OrderStatus Status { get; set; }
 
