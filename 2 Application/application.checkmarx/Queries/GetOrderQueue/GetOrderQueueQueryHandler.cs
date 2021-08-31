@@ -19,7 +19,8 @@ namespace application.checkmarx.Queries
 
         public async Task<IList<IResult>> Handle(GetOrderQueueQuery query)
         {
-            var orders = _context.Orders.Where(p => p.Status == OrderStatus.Preparing || p.Status == OrderStatus.SentToKitchen).OrderByDescending(x=>x.CreationDate).ToList();
+            var orders = _context.Orders.Where(p => p.Status == query.Status 
+            || query.Status==OrderStatus.None).OrderByDescending(x=>x.CreationDate).ToList();
             if (orders == null)
                 return null;
 

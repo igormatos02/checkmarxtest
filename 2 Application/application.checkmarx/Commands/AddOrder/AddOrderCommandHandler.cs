@@ -1,9 +1,9 @@
-﻿using domain.entities.checkmarx;
+﻿using crosscutting.checkmarx.Enums;
+using domain.entities.checkmarx;
 using FluentValidation;
 using FluentValidation.Results;
 using services.checkmarxs;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +39,10 @@ namespace application.checkmarx.Commands.AddOrder
                 OrderId = command.OrderId,
                 WaiterId = command.WaiterId,
                 TableNumber = command.TableNumber,
-                Dishes = command.Dishes
+                Dishes = command.Dishes,
+                CreationDate = DateTime.Now,
+                Status = OrderStatus.SentToKitchen
+
             };
 
             _context.Orders.Add(order);

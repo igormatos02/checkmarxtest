@@ -13,27 +13,36 @@
 @inject IRabbitMQService RabbitMQService
 <h1>Order Queue Screen</h1>
 
+<table>
+    <tr>
+        <td>Select a Chef </td>
+        <td> <select class="form-control"  @bind="chefId">
+                @if (chefs != null) {
+                    @foreach (var d in chefs)
+                    {   
+                        var chef = (ChefDisplay)d;
+                        <option value="@chef.Id">@chef.Name</option>
+                    }
+                }
+            </select>
+            </td>
+    </tr>
+</table>
+<hr />
+@if (chefId != 0) { 
 <table width="100%">
     <tr>
         <td>
             <table>
                 <tr>
-                    <td>Chef</td>
-                    <td> <select  @bind="chefId">
-                            @if (chefs != null) {
-                                @foreach (var d in chefs)
-                                {   
-                                    var chef = (ChefDisplay)d;
-                                    <option value="@chef.Id">@chef.Name</option>
-                                }
-                            }
-                        </select>
-                     </td>
-                </tr>
-                <tr>
-                    <td width="400px">
+                    <td width="600px">
                         @if (orders != null)
                         { <table class="table">
+                        <tr>
+                            <td>Table Number</td>
+                            <td>Date</td>
+                             <td>Status</td>
+                        </tr>
                             @foreach (var d in orders)
                             {
                                 var order = (OrderDisplay)d;
@@ -54,6 +63,7 @@
                 </tr>
             </table>
         </td>
+        <td style="width:30px"></td>
         <td>
         @if (currentOrder != null)
         {
@@ -108,8 +118,8 @@
         </td>
     </tr>
 </table>
-
-
+}
+<button @onclick="()=>testMq()"></button>
 
 @code {
 
@@ -118,16 +128,14 @@
     private IList<IResult> waiters;
     private IList<IResult> dishes;
     private OrderDisplay currentOrder;
-    private int chefId;
+    private int chefId = 0;
     protected override async Task OnInitializedAsync()
     {
-        orders = await getOrderQuery.Handle(new GetOrderQueueQuery() {});
+        orders = await getOrderQuery.Handle(new GetOrderQueueQuery() {Status = OrderStatus.SentToKitchen});
         chefs = await getChefsQuery.Handle(new GetChefsQuery());
         dishes = await getDishesQuery.Handle(new GetDishesQuery());
         waiters = await getWaitersQuery.Handle(new GetWaitersQuery());
     }
-
-
 
     private void PrepareOrder(OrderDisplay order)
     {
@@ -139,23 +147,21 @@
             Status = OrderStatus.Preparing
         });
 
-
-        //RabbitMQService.Connect();
-
+       
     }
 
     private void DeliverOrder()
     {
-        //order.Status = OrderStatus.Preparing;
-        //currentOrder = order;
-        //changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
-        //{
-        //    OrderId = order.OrderId,
-        //    Status = OrderStatus.Preparing
-        //});
-
-
-        //RabbitMQService.Connect();
-
+        currentOrder.Status = OrderStatus.ReadyToDeliver;
+        changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
+        {
+            OrderId = currentOrder.OrderId,
+            Status = currentOrder.Status
+        });
     }
+
+    private void testMq()
+        {
+              RabbitMQService.Receive("OrderQueue");
+        }
 }

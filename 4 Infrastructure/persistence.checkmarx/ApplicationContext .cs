@@ -17,44 +17,7 @@ namespace persistence.checkmarx
         {
             _orders = new List<Order>()
             {
-                new Order
-                {
-                    OrderId = new Guid("b9eac4cd-016a-4fd2-9d37-40c0a5a9e300"),
-                    WaiterId = 1,
-                    TableNumber = 1,
-                    Status = OrderStatus.SentToKitchen,
-                    Dishes = new List<int>{ 1,1,2 },
-                    CreationDate = new DateTime(2021,12,1,10,30,0)
-                },
-
-                new Order
-                {
-                    OrderId = new Guid("b9eac4cd-016a-4fd2-9d37-40c0a5a9e302"),
-                    WaiterId = 1,
-                    TableNumber = 1,
-                    Status = OrderStatus.SentToKitchen,
-                    Dishes = new List<int>{ 1,1,2,2,2 },
-                    CreationDate = new DateTime(2021,12,1,10,0,0)
-                },
-                new Order
-                {
-                    OrderId = new Guid("b9eac4cd-016a-4fd2-9d37-40c0a5a9e304"),
-                    WaiterId = 1,
-                    TableNumber = 1,
-                    Status = OrderStatus.SentToKitchen,
-                    Dishes = new List<int>{ 1,3,2,3 },
-                    CreationDate = new DateTime(2021,12,1,00,0,0)
-                },
-                 new Order
-                {
-                    OrderId = new Guid("b9eac4cd-016a-4fd2-9d37-40c0a5a9e306"),
-                    WaiterId =  2,
-                    TableNumber = 1,
-                    ChefId = 1,
-                    Status = OrderStatus.Preparing,
-                    Dishes = new List<int>{ 3,3,2 },
-                    CreationDate = new DateTime(2021,12,1,09,20,0)
-                },
+              
             };
 
             _dishes = new List<Dish>()

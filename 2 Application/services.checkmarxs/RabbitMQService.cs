@@ -3,6 +3,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Text;
+using System.Threading;
 
 namespace services.checkmarxs
 {
@@ -36,7 +37,7 @@ namespace services.checkmarxs
             consumer.Received += delegate (object model, BasicDeliverEventArgs ea) {
                 // Get the ChatHub from SignalR (using DI)
                 var queueHub = (IHubContext<QueueHub>)_serviceProvider.GetService(typeof(IHubContext<QueueHub>));
-
+                
                 // Send message to all users in SignalR
                 queueHub.Clients.All.SendAsync("messageReceived", "You have received a message");
 
@@ -48,32 +49,67 @@ namespace services.checkmarxs
 
         public string Receive(string queue)
         {
-            return "MEssage Received!";
+            string message = string.Empty;
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+
+                channel.QueueDeclare(queue: queue,
+                                durable: false,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                // Fair dispatch: prefetchCount: 1
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+
+                var channel1 = channel;
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (model, ea) =>
+                {
+                    var body = ea.Body.ToArray();
+                    message = Encoding.UTF8.GetString(body);
+
+
+                    var dots = message.Split('.').Length - 1;
+                   
+
+                    // Message acknowledgment
+                    channel1.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                };
+
+                // Message acknowledgment: autoAck: false
+                channel.BasicConsume(queue: queue,
+                    autoAck: false,
+                    consumer: consumer);
+
+            }
+            return message;
         }
 
         public void Send(string message,string queue)
         {
-            //var factory = new ConnectionFactory() { HostName = "localhost" };
-            //using (var connection = factory.CreateConnection())
-            //using (var channel = connection.CreateModel())
-            //{
-            //    channel.QueueDeclare(queue: "newOrders",
-            //                         durable: false,
-            //                         exclusive: false,
-            //                         autoDelete: false,
-            //                         arguments: null);
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: queue,
+                                     durable: false,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
 
-            //    var body = Encoding.UTF8.GetBytes(message);
+                var body = Encoding.UTF8.GetBytes(message);
 
-            //    channel.BasicPublish(exchange: "",
-            //                         routingKey: "newOrders",
-            //                         basicProperties: null,
-            //                         body: body);
-            //    Console.WriteLine(" [x] Sent {0}", message);
-            //}
+                channel.BasicPublish(exchange: "",
+                                     routingKey: queue,
+                                     basicProperties: null,
+                                     body: body);
+                
+            }
 
-            //Console.WriteLine(" Press [enter] to exit.");
-            //Console.ReadLine();
+        
 
         }
     }

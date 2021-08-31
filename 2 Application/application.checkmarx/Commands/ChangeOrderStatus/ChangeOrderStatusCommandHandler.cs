@@ -34,13 +34,15 @@ namespace application.checkmarx.Commands
                 throw new ValidationException(message.ToString());
             }
 
-          
 
-            var order  = _context.Orders.Where(x=>x.OrderId.ToString() == command.OrderId.ToString()).FirstOrDefault();
+            var orders = _context.Orders.ToList();
+            var order  = orders.Where(x=>x.OrderId.ToString() == command.OrderId.ToString()).FirstOrDefault();
+            
             if(order!= null)
             {
                 order.Status = command.Status;
-                if(order.Status == OrderStatus.Preparing) { 
+                _context.Orders = orders;
+                if (order.Status == OrderStatus.Preparing) { 
                     _rabbitMQService.Send(string.Format("Order from table {0} started to be prepared.",order.TableNumber), "deliveryQueue");
                 }else if(order.Status == OrderStatus.ReadyToDeliver)
                     _rabbitMQService.Send(string.Format("Order from table {0} id ready to deliver.", order.TableNumber), "deliveryQueue");

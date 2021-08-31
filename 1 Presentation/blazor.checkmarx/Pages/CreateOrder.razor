@@ -9,81 +9,126 @@
 @inject IQueryHandler<GetDishesQuery> getDishesQuery
 @inject IQueryHandler<GetChefsQuery>  getChefsQuery
 @inject IQueryHandler<GetWaitersQuery>  getWaitersQuery
+@inject IQueryHandler<GetOrderQueueQuery> getOrderQuery
 @inject IRabbitMQService RabbitMQService
 <h1>Create Order Screen</h1>
 
 <button class="btn btn-primary"  @onclick="NewOrder">Clean Order</button>
 <button class="btn btn-primary" @onclick="SaveOrder">Create Order</button>
 
+
+
+<hr>
+<table >
+     <tr>
+                <td>Waiter</td>
+                <td> <select class="form-control"  @bind="currentOrder.WaiterId">
+                        @if (waiters != null) {
+                            @foreach (var d in waiters)
+                            {   
+                                var waiter = (WaiterDisplay)d;
+                                <option value="@waiter.Id">@waiter.Name</option>
+                            }
+                        }
+                    </select>
+                    </td>
+            </tr>
+            <tr>
+                <td>Table Number</td>
+                <td>
+                    <select  class="form-control"  @bind="currentOrder.TableNumber">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                    </select>
+                </td>
+            </tr>
+</table>
+<hr>
+
 <table>
-     <tr>
-        <td>Waiter</td>
-        <td> <select  @bind="currentOrder.WaiterId">
-                @if (waiters != null) {
-                    @foreach (var d in waiters)
-                    {   
-                        var waiter = (WaiterDisplay)d;
-                        <option value="@waiter.Id">@waiter.Name</option>
-                    }
-                }
-            </select>
-         </td>
-    </tr>
     <tr>
-        <td>Table Number</td>
-        <td>
-            <select  @bind="currentOrder.TableNumber">
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-            </select>
-        </td>
-    </tr>
-     <tr>
-         <td> @if (dishes!= null) { 
-                    @foreach(var d in dishes) {
-                        var dish = (DishDisplay)d;
-                                  
-                    <button @onclick="()=>AddDish(dish)">Add @dish.Description</button>
-                    }
-                }</td>
-    </tr>
-    <tr>
-        <td>
-            <table class="table table-striped" width="600px">
-                 <tr>
-                    <td>Id</td>
-                    <td>Description</td>
-                    <td>Price</td>
-                    <td>Preparation Time</td>
-                </tr>
-            @foreach (var d in currentOrder.Dishes)
-            {
-                var dish = @dishes.Select(x => (DishDisplay)x).Where(x => x.Id == d).FirstOrDefault();
+        <td style="width:600px;" valign="top">
+            @if (currentOrder.WaiterId > 0 && currentOrder.TableNumber > 0) {
+            <table>
                 <tr>
-                    <td>@d</td>
-                    <td>@dish.Description</td>
-                    <td>@dish.Price</td>
-                    <td>@dish.PreparationTime.ToString()</td>
+                    <td>  Click The buttons To Add Dishes to this Order</td>
                 </tr>
+                <tr>
+                    <td> @if (dishes != null) {
+                            @foreach (var d in dishes) {
+                                var dish = (DishDisplay)d;
+
+                            <button @onclick="() => AddDish(dish)">Add @dish.Description</button>
+                            }
+                    }</td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="table table-striped" width="600px">
+                            <tr>
+                            <td>Id</td>
+                            <td>Description</td>
+                            <td>Price</td>
+                            <td>Preparation Time</td>
+                        </tr>
+                    @foreach (var d in currentOrder.Dishes)
+                    {
+                        var dish = @dishes.Select(x => (DishDisplay)x).Where(x => x.Id == d).FirstOrDefault();
+                        <tr>
+                            <td>@d</td>
+                            <td>@dish.Description</td>
+                            <td>@dish.Price</td>
+                            <td>@dish.PreparationTime.ToString()</td>
+                        </tr>
+                    }
+                    </table>
+                </td>
+            </tr>
+        </table>
             }
-            </table>
+        </td>
+        <td style="width:30px" valign="top"></td>
+        <td valign="top">
+            <h1>Orders</h1>
+                @if (orders != null)
+                        { <table class="table">
+                        <tr>
+                            <td>Table Number</td>
+                            <td>Date</td>
+                             <td>Status</td>
+                        </tr>
+                            @foreach (var d in orders)
+                            {
+                                var order = (OrderDisplay)d;
+                                <tr>
+                                    <td>@order.TableNumber.ToString()</td>
+                                    <td>@order.CreationDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@order.Status.ToString()</td>
+                                    
+                                </tr>
+                            }
+                        </table>
+                        }
         </td>
     </tr>
 </table>
-
+<div class="badge bg-warning text-dark">@currentOrder.Validation</div>
 
 @code {
-  
+
     private IList<IResult> dishes;
     private IList<IResult> waiters;
+    private IList<IResult> orders;
     private AddOrderCommand currentOrder;
+    
     protected override async Task OnInitializedAsync()
     {
         dishes = await getDishesQuery.Handle(new GetDishesQuery());
         waiters = await getWaitersQuery.Handle(new GetWaitersQuery());
+        orders = await getOrderQuery.Handle(new GetOrderQueueQuery() {Status = OrderStatus.None});
         NewOrder();
     }
 
@@ -98,15 +143,33 @@
         {
             Status = OrderStatus.None
         };
+
+       
     }
 
     private void SaveOrder()
     {
         currentOrder.Status = OrderStatus.SentToKitchen;
         currentOrder.CreationDate = DateTime.Now;
-        addCommandHandler.Handle(currentOrder);
-        NewOrder();
-       //RabbitMQService.Connect();
- 
+        var saveResult = addCommandHandler.Handle(currentOrder);
+
+        if (saveResult.Status == TaskStatus.Faulted)
+        {
+             currentOrder.Validation = saveResult.Exception.Message;
+        }
+        else { 
+
+            orders.Add(new OrderDisplay() {
+                OrderId = currentOrder.OrderId,
+                Status = currentOrder.Status,
+                CreationDate = currentOrder.CreationDate,
+                Dishes = currentOrder.Dishes,
+                TableNumber = currentOrder.TableNumber,
+                WaiterId=currentOrder.WaiterId
+            });
+            NewOrder();
+         }
+        //RabbitMQService.Connect();
+
     }
 }

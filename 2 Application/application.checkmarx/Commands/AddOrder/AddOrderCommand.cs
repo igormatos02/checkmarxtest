@@ -10,6 +10,7 @@ namespace application.checkmarx.Commands.AddOrder
     {
         public AddOrderCommand(){
             Dishes = new List<int>();
+            this.OrderId = Guid.NewGuid();
         }
 
         public Guid OrderId { get; set; }
@@ -18,7 +19,7 @@ namespace application.checkmarx.Commands.AddOrder
         public int TableNumber { get; set; }
         public OrderStatus Status { get; set; }
         public DateTime CreationDate { get; set; }
-
+        public string Validation { get; set; }
         public List<int> Dishes { get; set; }
 
     }
