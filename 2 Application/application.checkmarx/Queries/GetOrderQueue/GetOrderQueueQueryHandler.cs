@@ -17,7 +17,7 @@ namespace application.checkmarx.Queries
 
         public IList<IResult> Handle(GetOrderQueueQuery query)
         {
-            var orders = _context.Orders.Where(p => p.Status == query.Status).ToList();
+            var orders = _context.Orders.Where(p => p.Status == query.Status).OrderByDescending(x=>x.CreationDate).ToList();
             if (orders == null)
                 return null;
 
@@ -30,7 +30,8 @@ namespace application.checkmarx.Queries
                     WaiterId = p.WaiterId,
                     Status = p.Status,
                     TableNumber = p.TableNumber,
-                    Dishes = p.Dishes
+                    Dishes = p.Dishes,
+                    CreationDate = p.CreationDate
                 };
                 results.Add(order);
 

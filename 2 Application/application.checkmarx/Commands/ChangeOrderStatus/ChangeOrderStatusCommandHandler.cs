@@ -1,6 +1,8 @@
-﻿using domain.entities.checkmarx;
+﻿using crosscutting.checkmarx.Enums;
+using domain.entities.checkmarx;
 using FluentValidation;
 using FluentValidation.Results;
+using services.checkmarxs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +14,11 @@ namespace application.checkmarx.Commands
     public class ChangeOrderStatusCommandHandler : ICommandHandler<ChangeOrderStatusCommand>
     {
         private readonly IApplicationContext _context;
-
-        public ChangeOrderStatusCommandHandler(IApplicationContext context)
+        private readonly IRabbitMQService _rabbitMQService;
+        public ChangeOrderStatusCommandHandler(IApplicationContext context, IRabbitMQService rabbitMQService)
         {
             _context = context;
+            _rabbitMQService = rabbitMQService;
         }
 
         public async Task Handle(ChangeOrderStatusCommand command)
@@ -37,12 +40,12 @@ namespace application.checkmarx.Commands
             if(order!= null)
             {
                 order.Status = command.Status;
-
+                if(order.Status == OrderStatus.Preparing) { 
+                    _rabbitMQService.Send(string.Format("Order from table {0} started to be prepared.",order.TableNumber), "deliveryQueue");
+                }else if(order.Status == OrderStatus.ReadyToDeliver)
+                    _rabbitMQService.Send(string.Format("Order from table {0} id ready to deliver.", order.TableNumber), "deliveryQueue");
             }
-            //MQueue Send
-
-            //Command must be processed asynchronously, so I used an Emty Task.
-            //In the real world, saving data is an asynchronous operation, we use something like _context. SaveChangesAsync ();
+           
             await Task.Run(() => { });
 
         }

@@ -13,6 +13,8 @@ namespace application.checkmarx.DisplayModels
         public int TableNumber { get; set; }
         public OrderStatus Status { get; set; }
 
-        public List<Dish> Dishes { get; set; }
+        public DateTime CreationDate { get; set; }
+
+        public List<int> Dishes { get; set; }
     }
 }

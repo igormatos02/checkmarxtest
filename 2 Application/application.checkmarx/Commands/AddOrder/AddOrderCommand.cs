@@ -12,7 +12,7 @@ namespace application.checkmarx.Commands.AddOrder
         public Guid WaiterId { get; set; }
         public int TableNumber { get; set; }
 
-        public List<Dish> Dishes { get; set; }
+        public List<int> Dishes { get; set; }
 
     }
 }

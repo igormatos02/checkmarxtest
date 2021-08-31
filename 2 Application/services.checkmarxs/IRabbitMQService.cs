@@ -8,7 +8,7 @@ namespace services.checkmarxs
     {
         void Connect();
 
-        void Send(string message);
-        string Receive();
+        void Send(string message, string queue);
+        string Receive(string queue);
     }
 }

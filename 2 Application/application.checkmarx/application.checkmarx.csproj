@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\3 Domain\domain.checkmarx\domain.checkmarx.csproj" />
     <ProjectReference Include="..\..\4 Infrastructure\crosscutting.checkmarx\crosscutting.checkmarx.csproj" />
+    <ProjectReference Include="..\services.checkmarxs\services.checkmarxs.csproj" />
   </ItemGroup>
 
 </Project>

@@ -46,34 +46,35 @@ namespace services.checkmarxs
             _channel.BasicConsume(queue: "TestQueue", autoAck: true, consumer: consumer);
         }
 
-        public string Receive()
+        public string Receive(string queue)
         {
-            throw new NotImplementedException();
+            return "MEssage Received!";
         }
 
-        public void Send(string message)
+        public void Send(string message,string queue)
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.QueueDeclare(queue: "newOrders",
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
+            //var factory = new ConnectionFactory() { HostName = "localhost" };
+            //using (var connection = factory.CreateConnection())
+            //using (var channel = connection.CreateModel())
+            //{
+            //    channel.QueueDeclare(queue: "newOrders",
+            //                         durable: false,
+            //                         exclusive: false,
+            //                         autoDelete: false,
+            //                         arguments: null);
 
-                var body = Encoding.UTF8.GetBytes(message);
+            //    var body = Encoding.UTF8.GetBytes(message);
 
-                channel.BasicPublish(exchange: "",
-                                     routingKey: "newOrders",
-                                     basicProperties: null,
-                                     body: body);
-                Console.WriteLine(" [x] Sent {0}", message);
-            }
+            //    channel.BasicPublish(exchange: "",
+            //                         routingKey: "newOrders",
+            //                         basicProperties: null,
+            //                         body: body);
+            //    Console.WriteLine(" [x] Sent {0}", message);
+            //}
 
-            Console.WriteLine(" Press [enter] to exit.");
-            Console.ReadLine();
+            //Console.WriteLine(" Press [enter] to exit.");
+            //Console.ReadLine();
+
         }
     }
 }
