@@ -1,4 +1,5 @@
 using application.checkmarx;
+using application.checkmarx.Commands;
 using application.checkmarx.Commands.AddOrder;
 using application.checkmarx.Queries;
 using blazor.checkmarx.Data;
@@ -39,8 +40,11 @@ namespace blazor.checkmarx
             services.AddSignalR();
             services.AddSingleton<IApplicationContext, ApplicationContext>();
             services.AddSingleton<ICommandHandler<AddOrderCommand>, AddOrderCommandHandler>();
+            services.AddSingleton<ICommandHandler<ChangeOrderStatusCommand>, ChangeOrderStatusCommandHandler>();
             services.AddSingleton<IQueryHandler<GetDishesQuery>, GetDishesQueryHandler>();
             services.AddSingleton<IQueryHandler<GetOrderQueueQuery>, GetOrderQueueQueryHandler>();
+            services.AddSingleton<IQueryHandler<GetChefsQuery>, GetChefsQueryHandler>();
+            services.AddSingleton<IQueryHandler<GetWaitersQuery>, GetWaitersQueryHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

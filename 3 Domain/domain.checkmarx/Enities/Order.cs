@@ -12,7 +12,6 @@ namespace domain.entities.checkmarx
         public int TableNumber { get; set; }
         public OrderStatus Status { get; set; }
         public DateTime CreationDate { get; set; }
-
         public List<int> Dishes { get;set;}
     }
 }

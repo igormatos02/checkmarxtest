@@ -7,6 +7,9 @@ namespace application.checkmarx.Commands.AddOrder
 {
     public class AddOrderCommand : ICommand
     {
+        public AddOrderCommand(){
+            Dishes = new List<int>();
+        }
 
         public Guid OrderId { get; set; }
         public Guid WaiterId { get; set; }

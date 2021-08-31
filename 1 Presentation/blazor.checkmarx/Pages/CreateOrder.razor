@@ -6,18 +6,29 @@
 @using services.checkmarxs
 @inject ICommandHandler<AddOrderCommand> addCommandHandler
 @inject IQueryHandler<GetDishesQuery> getDishesQuery
+@inject IQueryHandler<GetChefsQuery>  getChefsQuery
+@inject IQueryHandler<GetWaitersQuery>  getWaitersQuery
 @inject IRabbitMQService RabbitMQService
 <h1>Counter</h1>
 
 <p>Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Clean Order</button>
-<button class="btn btn-primary" @onclick="IncrementCount">Add new Order</button>
+<button class="btn btn-primary"  @onclick="NewOrder">Clean Order</button>
+<button class="btn btn-primary" @onclick="SaveOrder">Save Order</button>
 
 <table>
      <tr>
-        <td>Waiter Id</td>
-        <td><input /></td>
+        <td>Waiter</td>
+        <td> <select>
+                @if (waiters != null) {
+                    @foreach (var d in waiters)
+                    {   
+                        var waiter = (WaiterDisplay)d;
+                        <option value="@waiter.Id">@waiter.Name</option>
+                    }
+                }
+            </select>
+         </td>
     </tr>
     <tr>
         <td>Table Number</td>
@@ -32,27 +43,35 @@
         </td>
     </tr>
      <tr>
-          <td colspan="2">
-              <table>
-                  <tr>
-                      <td valign="top">
-                          Dishes
-                          <table>
-                              <tr></tr>
-                          </table>
-                      </td>
-                      <td valign="top">
-                          @if (dishes!= null) { 
-                              @foreach(var d in dishes) {
-                                 var dish = (DishDisplay)d;
+         <td> @if (dishes!= null) { 
+                    @foreach(var d in dishes) {
+                        var dish = (DishDisplay)d;
                                   
-                              <button>Add @dish.Description</button>
-                              }
-                           }
-                      </td>
-                  </tr>
-              </table>
-          </td>
+                    <button @onclick="()=>AddDish(dish)">Add @dish.Description</button>
+                    }
+                }</td>
+    </tr>
+    <tr>
+        <td>
+            <table class="table table-striped" width="600px">
+                 <tr>
+                    <td>Id</td>
+                    <td>Description</td>
+                    <td>Price</td>
+                    <td>Preparation Time</td>
+                </tr>
+            @foreach (var d in currentOrder.Dishes)
+            {
+                var dish = @dishes.Select(x => (DishDisplay)x).Where(x => x.Id == d).FirstOrDefault();
+                <tr>
+                    <td>@d</td>
+                    <td>@dish.Description</td>
+                    <td>@dish.Price</td>
+                    <td>@dish.PreparationTime.ToString()</td>
+                </tr>
+            }
+            </table>
+        </td>
     </tr>
 </table>
 
@@ -60,17 +79,29 @@
 @code {
     private int currentCount = 0;
     private IList<IResult> dishes;
-     protected override async Task OnInitializedAsync()
+    private IList<IResult> waiters;
+    private AddOrderCommand currentOrder;
+    protected override async Task OnInitializedAsync()
     {
         dishes = getDishesQuery.Handle(new GetDishesQuery());
+        waiters = getWaitersQuery.Handle(new GetWaitersQuery());
+        NewOrder();
     }
-     
-    private void IncrementCount()
+
+    private void AddDish(DishDisplay d)
     {
-        currentCount++;
-        RabbitMQService.Connect();
-       
-      
-        //addCommandHandler.Handle(new AddOrderCommand() { });
+        currentOrder.Dishes.Add(d.Id);
+    }
+
+    private void NewOrder()
+    {
+        currentOrder = new AddOrderCommand();
+    }
+
+    private void SaveOrder()
+    {
+        addCommandHandler.Handle(currentOrder);
+       //RabbitMQService.Connect();
+ 
     }
 }

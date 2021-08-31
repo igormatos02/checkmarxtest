@@ -10,6 +10,8 @@ namespace persistence.checkmarx
     {
         private List<Order> _orders;
         private List<Dish> _dishes;
+        private List<Waiter> _waiters;
+        private List<Chef> _chefs;
 
         public ApplicationContext()
         {
@@ -72,11 +74,30 @@ namespace persistence.checkmarx
                 },
                 new Dish()
                 {
-                    Id = 2,
+                    Id = 3,
                     Description  = "Soap",
                     PreparationTime = TimeSpan.FromMinutes(10),
                     Price = 15
                 }
+                ,
+                new Dish()
+                {
+                    Id = 4,
+                    Description  = "Fish and Potatos",
+                    PreparationTime = TimeSpan.FromMinutes(40),
+                    Price = 35
+                }
+            };
+
+            _chefs = new List<Chef>
+            {
+                new Chef{ Id=1, Name="Ronaldo"}
+            };
+
+            _waiters = new List<Waiter>
+            {
+                 new Waiter{ Id=1, Name="Jhon"},
+                 new Waiter{ Id=2, Name="Paul"}
             };
         }
 
@@ -90,6 +111,18 @@ namespace persistence.checkmarx
         {
             get => _dishes;
             set => _dishes = (List<Dish>)value;
+        }
+
+        public IList<Waiter> Waiters
+        {
+            get => _waiters;
+            set => _waiters = (List<Waiter>)value;
+        }
+
+        public IList<Chef> Chefs
+        {
+            get => _chefs;
+            set => _chefs = (List<Chef>)value;
         }
     }
 }
