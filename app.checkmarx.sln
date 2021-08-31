@@ -23,6 +23,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "persistence.checkmarx", "4 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "blazor.checkmarx", "1 Presentation\blazor.checkmarx\blazor.checkmarx.csproj", "{D9B16941-E1B3-4576-A4A7-66263DD65F9C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D9EEAD2F-A038-47C4-AAEF-1892891FDD19}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Users\Igor Matos\Desktop\checkmarx restauran Sequence Diagram.png = ..\..\..\Users\Igor Matos\Desktop\checkmarx restauran Sequence Diagram.png
+		..\..\..\Users\Igor Matos\Desktop\The Restaurant - SA.docx = ..\..\..\Users\Igor Matos\Desktop\The Restaurant - SA.docx
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

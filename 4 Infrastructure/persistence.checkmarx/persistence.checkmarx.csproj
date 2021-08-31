@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\application.checkmarx\application.checkmarx.csproj" />
+    <ProjectReference Include="..\..\2 Application\application.checkmarx\application.checkmarx.csproj" />
+    <ProjectReference Include="..\..\3 Domain\domain.checkmarx\domain.checkmarx.csproj" />
   </ItemGroup>
 
 </Project>
