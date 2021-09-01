@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using crosscutting.checkmarx;
+using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
@@ -29,7 +30,7 @@ namespace services.checkmarxs
         public virtual void Connect()
         {
             // Declare a RabbitMQ Queue
-            _channel.QueueDeclare(queue: "TestQueue", durable: true, exclusive: false, autoDelete: false);
+            _channel.QueueDeclare(queue: AppConstants.ORDER_QUEUE, durable: false, exclusive: false, autoDelete: false);
 
             var consumer = new EventingBasicConsumer(_channel);
 
@@ -37,14 +38,15 @@ namespace services.checkmarxs
             consumer.Received += delegate (object model, BasicDeliverEventArgs ea) {
                 // Get the ChatHub from SignalR (using DI)
                 var queueHub = (IHubContext<QueueHub>)_serviceProvider.GetService(typeof(IHubContext<QueueHub>));
-                
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
                 // Send message to all users in SignalR
-                queueHub.Clients.All.SendAsync("messageReceived", "You have received a message");
+                queueHub.Clients.All.SendAsync("orderReceived", "You Have a New Order On the to Be Prepared on the Queue");
 
             };
 
             // Consume a RabbitMQ Queue
-            _channel.BasicConsume(queue: "TestQueue", autoAck: true, consumer: consumer);
+            _channel.BasicConsume(queue: AppConstants.ORDER_QUEUE, autoAck: true, consumer: consumer);
         }
 
         public string Receive(string queue)
@@ -76,7 +78,7 @@ namespace services.checkmarxs
                    
 
                     // Message acknowledgment
-                    channel1.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                    //channel1.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                 };
 
                 // Message acknowledgment: autoAck: false

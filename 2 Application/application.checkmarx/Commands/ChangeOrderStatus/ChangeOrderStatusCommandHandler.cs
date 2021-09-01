@@ -1,4 +1,5 @@
-﻿using crosscutting.checkmarx.Enums;
+﻿using crosscutting.checkmarx;
+using crosscutting.checkmarx.Enums;
 using domain.entities.checkmarx;
 using FluentValidation;
 using FluentValidation.Results;
@@ -42,10 +43,10 @@ namespace application.checkmarx.Commands
             {
                 order.Status = command.Status;
                 _context.Orders = orders;
-                if (order.Status == OrderStatus.Preparing) { 
-                    _rabbitMQService.Send(string.Format("Order from table {0} started to be prepared.",order.TableNumber), "DeliveryQueue");
+                if (order.Status == OrderStatus.Preparing) {
+                    _rabbitMQService.Send(string.Format("Order from table {0} started to be prepared.", order.TableNumber), AppConstants.DELEIVERY_QUEUE);
                 }else if(order.Status == OrderStatus.ReadyToDeliver)
-                    _rabbitMQService.Send(string.Format("Order from table {0} id ready to deliver.", order.TableNumber), "DeliveryQueue");
+                    _rabbitMQService.Send(string.Format("Order from table {0} id ready to deliver.", order.TableNumber), AppConstants.DELEIVERY_QUEUE);
             }
            
             await Task.Run(() => { });

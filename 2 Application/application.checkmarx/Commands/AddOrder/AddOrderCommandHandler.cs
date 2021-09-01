@@ -1,4 +1,5 @@
-﻿using crosscutting.checkmarx.Enums;
+﻿using crosscutting.checkmarx;
+using crosscutting.checkmarx.Enums;
 using domain.entities.checkmarx;
 using FluentValidation;
 using FluentValidation.Results;
@@ -46,7 +47,7 @@ namespace application.checkmarx.Commands.AddOrder
             };
 
             _context.Orders.Add(order);
-            _rabbitMQService.Send("New Order", "OrderQueue");
+            _rabbitMQService.Send("New Order on the Queue", AppConstants.ORDER_QUEUE);
 
             await Task.Run(() => { });
 

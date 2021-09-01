@@ -72,10 +72,7 @@ namespace blazor.checkmarx
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
-            });
-            app.UseEndpoints(configure =>
-            {
-                configure.MapHub<QueueHub>("/queueHub");
+                endpoints.MapHub<QueueHub>("/orderHub");
             });
             lifetime.ApplicationStarted.Register(() => RegisterSignalRWithRabbitMQ(app.ApplicationServices));
         }
