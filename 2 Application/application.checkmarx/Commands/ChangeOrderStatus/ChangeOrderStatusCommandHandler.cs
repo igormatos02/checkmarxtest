@@ -43,9 +43,9 @@ namespace application.checkmarx.Commands
                 order.Status = command.Status;
                 _context.Orders = orders;
                 if (order.Status == OrderStatus.Preparing) { 
-                    _rabbitMQService.Send(string.Format("Order from table {0} started to be prepared.",order.TableNumber), "deliveryQueue");
+                    _rabbitMQService.Send(string.Format("Order from table {0} started to be prepared.",order.TableNumber), "DeliveryQueue");
                 }else if(order.Status == OrderStatus.ReadyToDeliver)
-                    _rabbitMQService.Send(string.Format("Order from table {0} id ready to deliver.", order.TableNumber), "deliveryQueue");
+                    _rabbitMQService.Send(string.Format("Order from table {0} id ready to deliver.", order.TableNumber), "DeliveryQueue");
             }
            
             await Task.Run(() => { });

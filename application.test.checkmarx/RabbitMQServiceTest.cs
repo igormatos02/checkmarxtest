@@ -1,4 +1,4 @@
-using application.checkmarx;
+﻿using application.checkmarx;
 using application.checkmarx.Commands.AddOrder;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using persistence.checkmarx;
@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 namespace application.test.checkmarx
 {
     [TestClass]
-    public class AddOrderCommandTest
+    public class RabbitMQServiceTest
     {
         private readonly IApplicationContext applicationContext;
         private readonly IRabbitMQService rabbitMQService;
         private readonly ICommandHandler<AddOrderCommand> addCommandHandler;
-        public AddOrderCommandTest()
+        public RabbitMQServiceTest()
         {
             applicationContext = new ApplicationContext();
             addCommandHandler = new AddOrderCommandHandler(applicationContext, rabbitMQService);
@@ -21,24 +21,24 @@ namespace application.test.checkmarx
         }
 
         [TestMethod]
-        public  void When_WaiterIdNotSet_Expect_ExpectedValidationExeption()
+        public void When_MessageIsProduced_ExpectedMessgeInQueue()
         {
-            var result = addCommandHandler.Handle(new AddOrderCommand() {});
+           
         }
         [TestMethod]
-        public void When_TableNumberIdNotSet_Expect_ExpectedValidationExeption()
+        public void When_MessageIsConsumed_ExpectedMessgeIsRemovedFromQueue()
         {
-            var result = addCommandHandler.Handle(new AddOrderCommand() { });
+           
         }
         [TestMethod]
-        public void When_OrderHasNopDishes_Expect_ExpectedValidationExeption()
+        public void WhenHostIsNotFound_ExpectHostNotFoundException()
         {
-            var result = addCommandHandler.Handle(new AddOrderCommand() { });
+          
         }
         [TestMethod]
-        public void When_OrderIsCreated_ExpectMessageInOrderQueue()
+        public void When_MessageIsProduced_ExpectedConsumerReceivingMessage()
         {
-            var result = addCommandHandler.Handle(new AddOrderCommand() { });
+         
         }
     }
 }
