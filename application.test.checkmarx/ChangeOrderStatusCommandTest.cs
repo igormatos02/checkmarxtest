@@ -23,6 +23,11 @@ namespace application.test.checkmarx
         }
 
         [TestMethod]
+        public void When_OrderNotFound_ExpectOrderNotFoundException()
+        {
+
+        }
+        [TestMethod]
         public void When_OrderStatusChangesToReadyToDeliver_ExpectMessageInDeliveryQueue()
         {
 

@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D9EEAD2F-A
 		..\..\..\Users\Igor Matos\Desktop\Entities.png = ..\..\..\Users\Igor Matos\Desktop\Entities.png
 		..\..\..\Users\Igor Matos\Desktop\Ordering Sequence.png = ..\..\..\Users\Igor Matos\Desktop\Ordering Sequence.png
 		..\..\..\Users\Igor Matos\Desktop\Preparing Sequence.png = ..\..\..\Users\Igor Matos\Desktop\Preparing Sequence.png
-		..\..\..\Users\Igor Matos\Desktop\The Restaurant - SA.docx = ..\..\..\Users\Igor Matos\Desktop\The Restaurant - SA.docx
+		The Restaurant - SA.docx = The Restaurant - SA.docx
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 Data", "5 Data", "{4F815915-8EE6-421F-9BF2-64BD683EB11C}"

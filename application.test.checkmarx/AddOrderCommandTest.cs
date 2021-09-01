@@ -26,6 +26,31 @@ namespace application.test.checkmarx
             var result = addCommandHandler.Handle(new AddOrderCommand() {});
         }
         [TestMethod]
+        public void When_WaiterIdNotInteger_Expect_ExpectedValidationExeption()
+        {
+            var result = addCommandHandler.Handle(new AddOrderCommand() { });
+        }
+        [TestMethod]
+        public void When_ChefIdNotInteger_Expect_ExpectedValidationExeption()
+        {
+            var result = addCommandHandler.Handle(new AddOrderCommand() { });
+        }
+        [TestMethod]
+        public void When_OrderIsNotaValidGuid_Expect_ExpectedValidationExeption()
+        {
+            var result = addCommandHandler.Handle(new AddOrderCommand() { });
+        }
+        [TestMethod]
+        public void When_TableNumberNotInteger_Expect_ExpectedValidationExeption()
+        {
+            var result = addCommandHandler.Handle(new AddOrderCommand() { });
+        }
+        [TestMethod]
+        public void When_CreationDateIsNotaValidDate_Expect_ExpectedValidationExeption()
+        {
+            var result = addCommandHandler.Handle(new AddOrderCommand() { });
+        }
+        [TestMethod]
         public void When_TableNumberIdNotSet_Expect_ExpectedValidationExeption()
         {
             var result = addCommandHandler.Handle(new AddOrderCommand() { });
