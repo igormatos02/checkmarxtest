@@ -4,6 +4,7 @@ using application.checkmarx.Commands.AddOrder;
 using application.checkmarx.Queries;
 using blazor.checkmarx.Data;
 using blazor.checkmarx.Shared;
+using crosscutting.checkmarx;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -36,7 +37,7 @@ namespace blazor.checkmarx
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
-            services.AddSingleton<IRabbitMQService, RabbitMQService>(); // Need a single instance so we can keep the referenced connect with RabbitMQ open
+            services.AddSingleton<IRabbitMQService, RabbitMQService>();
             services.AddSignalR();
             services.AddSingleton<IApplicationContext, ApplicationContext>();
             services.AddSingleton<ICommandHandler<AddOrderCommand>, AddOrderCommandHandler>();
@@ -80,7 +81,8 @@ namespace blazor.checkmarx
         {
             // Connect to RabbitMQ
             var rabbitMQService = (IRabbitMQService)serviceProvider.GetService(typeof(IRabbitMQService));
-            rabbitMQService.Connect();
+            rabbitMQService.Connect(AppConstants.ORDER_QUEUE, "orderReceived");
+            rabbitMQService.Connect(AppConstants.DELEIVERY_QUEUE,"deliveryReceived");
         }
 
     }

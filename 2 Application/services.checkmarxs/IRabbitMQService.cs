@@ -6,9 +6,9 @@ namespace services.checkmarxs
 {
     public interface IRabbitMQService
     {
-        void Connect();
-
+        void Connect(string queue,string method);
+     
         void Send(string message, string queue);
-        string Receive(string queue);
+      
     }
 }

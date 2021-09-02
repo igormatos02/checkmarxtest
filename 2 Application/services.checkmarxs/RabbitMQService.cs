@@ -27,10 +27,10 @@ namespace services.checkmarxs
             _serviceProvider = serviceProvider;
         }
 
-        public virtual void Connect()
+        public virtual void Connect(string queue,string method)
         {
             // Declare a RabbitMQ Queue
-            _channel.QueueDeclare(queue: AppConstants.ORDER_QUEUE, durable: false, exclusive: false, autoDelete: false);
+            _channel.QueueDeclare(queue: queue, durable: false, exclusive: false, autoDelete: false);
 
             var consumer = new EventingBasicConsumer(_channel);
 
@@ -41,53 +41,12 @@ namespace services.checkmarxs
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 // Send message to all users in SignalR
-                queueHub.Clients.All.SendAsync("orderReceived", "You Have a New Order On the to Be Prepared on the Queue");
+                queueHub.Clients.All.SendAsync(method, message);
 
             };
 
             // Consume a RabbitMQ Queue
-            _channel.BasicConsume(queue: AppConstants.ORDER_QUEUE, autoAck: true, consumer: consumer);
-        }
-
-        public string Receive(string queue)
-        {
-            string message = string.Empty;
-            var factory = new ConnectionFactory() { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-
-                channel.QueueDeclare(queue: queue,
-                                durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
-
-                // Fair dispatch: prefetchCount: 1
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
-
-                var channel1 = channel;
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += (model, ea) =>
-                {
-                    var body = ea.Body.ToArray();
-                    message = Encoding.UTF8.GetString(body);
-
-
-                    var dots = message.Split('.').Length - 1;
-                   
-
-                    // Message acknowledgment
-                    //channel1.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-                };
-
-                // Message acknowledgment: autoAck: false
-                channel.BasicConsume(queue: queue,
-                    autoAck: false,
-                    consumer: consumer);
-
-            }
-            return message;
+            _channel.BasicConsume(queue: queue, autoAck: true, consumer: consumer);
         }
 
         public void Send(string message,string queue)

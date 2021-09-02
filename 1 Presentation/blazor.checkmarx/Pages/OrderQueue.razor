@@ -12,7 +12,7 @@
 @inject IQueryHandler<GetOrderQueueQuery> getOrderQuery
 @inject IRabbitMQService RabbitMQService
 <h1>Order Queue Screen</h1>
-
+<button @onclick="() => Refresh()">Refresh</button>
 <table>
     <tr>
         <td>Select a Chef </td>
@@ -120,10 +120,8 @@
 </table>
 }
 
-<ul id="messagesList" style="background-color:red; color:white"></ul>                   
+<ul id="orderList" style="background-color:red; color:white"></ul>                   
 
-
-@*<button @onclick="()=>testMq()"></button>*@
 
 @code {
 
@@ -150,8 +148,6 @@
             OrderId = order.OrderId,
             Status = OrderStatus.Preparing
         });
-
-       
     }
 
     private void DeliverOrder()
@@ -164,8 +160,10 @@
         });
     }
 
-    private void testMq()
-        {
-              RabbitMQService.Receive("OrderQueue");
-        }
+    public async Task Refresh()
+    {
+        orders = await getOrderQuery.Handle(new GetOrderQueueQuery() {Status = OrderStatus.SentToKitchen});
+        StateHasChanged();
+    }
+   
 }
