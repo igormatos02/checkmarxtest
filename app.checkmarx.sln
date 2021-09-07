@@ -30,12 +30,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D9EEAD2F-A
 		..\..\..\Users\Igor Matos\Desktop\Entities.png = ..\..\..\Users\Igor Matos\Desktop\Entities.png
 		..\..\..\Users\Igor Matos\Desktop\Ordering Sequence.png = ..\..\..\Users\Igor Matos\Desktop\Ordering Sequence.png
 		..\..\..\Users\Igor Matos\Desktop\Preparing Sequence.png = ..\..\..\Users\Igor Matos\Desktop\Preparing Sequence.png
-		The Restaurant - SA.docx = The Restaurant - SA.docx
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 Data", "5 Data", "{4F815915-8EE6-421F-9BF2-64BD683EB11C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "application.test.checkmarx", "application.test.checkmarx\application.test.checkmarx.csproj", "{18630E17-A269-4333-B846-9C547E1CABE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "application.test.checkmarx", "application.test.checkmarx\application.test.checkmarx.csproj", "{18630E17-A269-4333-B846-9C547E1CABE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
