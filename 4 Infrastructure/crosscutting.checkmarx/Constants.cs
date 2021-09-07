@@ -17,5 +17,6 @@ namespace crosscutting.checkmarx
         public const string TABLE_NOT_SET_MSG = "Table must be selected";
         public const string CHEF_NOT_SET_MSG = "Chef must be selected";
         public const string WAITER_NOT_SET_MSG = "Waiter must be selected";
+        public const string CHEF_IS_BUSY_MSG = "Chef is Already Busy";
     }
 }

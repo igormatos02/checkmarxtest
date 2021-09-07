@@ -24,7 +24,11 @@ namespace application.checkmarx.Commands
 
         public async Task Handle(ChangeOrderStatusCommand command)
         {
-            var validator = new ChangeOrderStatusCommandValidator();
+            var orders = _context.Orders.Where(x => x.ChefId == command.ChefId).ToList();
+            var currentOrder = orders.Where(x => x.OrderId.ToString() == command.OrderId.ToString()).FirstOrDefault();
+
+            var validator = new ChangeOrderStatusCommandValidator(currentOrder, orders);
+
             ValidationResult results = validator.Validate(command);
             bool validationSucceeded = results.IsValid;
             if (!validationSucceeded)
@@ -36,17 +40,14 @@ namespace application.checkmarx.Commands
             }
 
 
-            var orders = _context.Orders.ToList();
-            var order  = orders.Where(x=>x.OrderId.ToString() == command.OrderId.ToString()).FirstOrDefault();
-            
-            if(order!= null)
+            if (currentOrder!= null)
             {
-                order.Status = command.Status;
+                currentOrder.Status = command.Status;
                 _context.Orders = orders;
-                if (order.Status == OrderStatus.Preparing) {
-                    _rabbitMQService.Send(string.Format("Order from table {0} started to be prepared.", order.TableNumber), AppConstants.DELEIVERY_QUEUE);
-                }else if(order.Status == OrderStatus.ReadyToDeliver)
-                    _rabbitMQService.Send(string.Format("Order from table {0} id ready to deliver.", order.TableNumber), AppConstants.DELEIVERY_QUEUE);
+                if (currentOrder.Status == OrderStatus.Preparing) {
+                    _rabbitMQService.Send(string.Format("Order from table {0} started to be prepared.", currentOrder.TableNumber), AppConstants.DELEIVERY_QUEUE);
+                }else if(currentOrder.Status == OrderStatus.ReadyToDeliver)
+                    _rabbitMQService.Send(string.Format("Order from table {0} id ready to deliver.", currentOrder.TableNumber), AppConstants.DELEIVERY_QUEUE);
             }
            
             await Task.Run(() => { });

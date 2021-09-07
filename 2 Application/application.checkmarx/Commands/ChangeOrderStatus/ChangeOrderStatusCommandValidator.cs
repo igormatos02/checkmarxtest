@@ -1,16 +1,30 @@
-﻿using crosscutting.checkmarx.Enums;
+﻿using crosscutting.checkmarx;
+using crosscutting.checkmarx.Enums;
+using domain.entities.checkmarx;
 using FluentValidation;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace application.checkmarx.Commands
 {
     public class ChangeOrderStatusCommandValidator : AbstractValidator<ChangeOrderStatusCommand>
     {
-        public ChangeOrderStatusCommandValidator()
+        public ChangeOrderStatusCommandValidator(Order currentOrder, List<Order> chefOrders)
         {
-           // RuleFor(p => p.Status).Equals(OrderStatus.Preparing).WithMessage("Order cannot be empty");
+            RuleFor(p => p.ChefId).GreaterThan(0).WithMessage(MessageErrorConstants.CHEF_NOT_SET_MSG);
+
+            //Business Rules
+            RuleFor(p => IsChefBusy(p.Status,chefOrders)).Equal(true).WithMessage(MessageErrorConstants.CHEF_IS_BUSY_MSG);
+        }
+
+        private bool IsChefBusy(OrderStatus newStatus, List<Order> chefOrders)
+        {
+            if(newStatus == OrderStatus.Preparing) {
+                var chefIsBusy = chefOrders.Where(x => x.Status == OrderStatus.Preparing).Count();
+                return chefIsBusy > 0;
+            }
+
+            return false;
         }
     }
 }

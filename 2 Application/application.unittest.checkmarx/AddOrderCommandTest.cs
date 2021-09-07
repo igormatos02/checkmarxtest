@@ -69,50 +69,6 @@ namespace application.test.checkmarx
         }
 
         [TestMethod]
-        public void When_ChefIdNotSet_Expected_ValidationExeptionForChefMustBeSelected()
-        {
-            //Arrange
-            var command = new AddOrderCommand()
-            {
-                OrderId = Guid.NewGuid(),
-                Status = OrderStatus.SentToKitchen,
-                CreationDate = DateTime.Now,
-                TableNumber = 1,
-                WaiterId = 1,
-                Dishes = new List<int> { 1, 2, 3 }
-            };
-
-            //Act
-            var result = addCommandHandler.Handle(command);
-
-            //Assert
-            Assert.IsTrue(result.IsFaulted);
-            Assert.IsTrue(result.Exception.InnerException.ToString().Contains(MessageErrorConstants.CHEF_NOT_SET_MSG));
-        }
-
-        [TestMethod]
-        public void When_ChefIdIsSet_Expected_NoValidationExeptionForChefId()
-        {
-            //Arrange
-            var command = new AddOrderCommand()
-            {
-                OrderId = Guid.NewGuid(),
-                Status = OrderStatus.SentToKitchen,
-                CreationDate = DateTime.Now,
-                TableNumber = 1,
-                ChefId = 1,
-                Dishes = new List<int> { 1, 2, 3 },
-                WaiterId = 1
-            };
-
-            //Act
-            var result = addCommandHandler.Handle(command);
-
-            //Assert
-            Assert.IsFalse(result.IsFaulted);
-        }
-
-        [TestMethod]
         public void When_TableNumberIdNotSetOrIsLessThanZero_Expect_ValidationExeptionForTableNumber()
         {
             //Arrange

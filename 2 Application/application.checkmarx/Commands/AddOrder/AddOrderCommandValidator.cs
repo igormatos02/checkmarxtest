@@ -12,7 +12,6 @@ namespace application.checkmarx.Commands.AddOrder
         {
            
             RuleFor(p => p.WaiterId).GreaterThan(0).WithMessage(MessageErrorConstants.WAITER_NOT_SET_MSG);
-            RuleFor(p => p.ChefId).GreaterThan(0).WithMessage(MessageErrorConstants.CHEF_NOT_SET_MSG);
             RuleFor(p => p.TableNumber).GreaterThan(0).WithMessage(MessageErrorConstants.TABLE_NOT_SET_MSG);
             RuleFor(p => p.Dishes).NotEmpty().WithMessage(MessageErrorConstants.EMPTY_DISHES_MSG);
            
