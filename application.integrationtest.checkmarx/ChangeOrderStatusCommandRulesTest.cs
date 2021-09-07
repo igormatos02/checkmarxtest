@@ -10,6 +10,7 @@ using persistence.checkmarx;
 using services.checkmarxs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace application.integrationtest.checkmarx
 {
@@ -33,32 +34,139 @@ namespace application.integrationtest.checkmarx
         public void When_StatusChangesToPrepareButChefIsBusy_Expected_ValidationExeptionForChefIsBusy()
         {
             //Arrange
-            var command = new ChangeOrderStatusCommand()
-            {
-                OrderId = Guid.NewGuid(),
-                Status = OrderStatus.Preparing,
-                ChefId = 1
-            };
 
+            // Set The Chef Busy
+            var addedOrderGuid = Guid.NewGuid();
             addCommandHandler.Handle(new AddOrderCommand()
             {
-                OrderId = Guid.NewGuid(),
+                OrderId = addedOrderGuid,
                 Status = OrderStatus.SentToKitchen,
                 CreationDate = DateTime.Now,
                 TableNumber = 1,
-                ChefId = 1,
                 Dishes = new List<int> { 1, 2, 3 },
                 WaiterId = 1
             });
 
+            changeOrderStatusCommandHandler.Handle(new ChangeOrderStatusCommand()
+            {
+                OrderId = addedOrderGuid,
+                Status = OrderStatus.Preparing,
+                ChefId = 1
+            });
+
+            // Cofigure a new Task for the Busy Chef
+            var newOrderGuid = Guid.NewGuid();
+            addCommandHandler.Handle(new AddOrderCommand()
+            {
+                OrderId = newOrderGuid,
+                Status = OrderStatus.SentToKitchen,
+                CreationDate = DateTime.Now,
+                TableNumber = 1,
+                Dishes = new List<int> { 1, 2, 3 },
+                WaiterId = 1
+            });
+            var command = new ChangeOrderStatusCommand()
+            {
+                OrderId = newOrderGuid,
+                Status = OrderStatus.Preparing,
+                ChefId = 1
+            };
+
             //Act
-
-
             var result = changeOrderStatusCommandHandler.Handle(command);
 
             //Assert
             Assert.IsTrue(result.IsFaulted);
             Assert.IsTrue(result.Exception.InnerException.ToString().Contains(MessageErrorConstants.CHEF_IS_BUSY_MSG));
+        }
+
+        [TestMethod]
+        public void When_StatusChangesToPrepareButChefIsNotBusy_Expected_NoValidationExeptionForChefIsBusy()
+        {
+            //Arrange
+
+            // Set The Chef Busy
+            var addedOrderGuid = Guid.NewGuid();
+            addCommandHandler.Handle(new AddOrderCommand()
+            {
+                OrderId = addedOrderGuid,
+                Status = OrderStatus.SentToKitchen,
+                CreationDate = DateTime.Now,
+                TableNumber = 1,
+                Dishes = new List<int> { 1, 2, 3 },
+                WaiterId = 1
+            });
+
+            changeOrderStatusCommandHandler.Handle(new ChangeOrderStatusCommand()
+            {
+                OrderId = addedOrderGuid,
+                Status = OrderStatus.Preparing,
+                ChefId = 1
+            });
+
+            // Cofigure a new Task for a diferent Chef
+            var newOrderGuid = Guid.NewGuid();
+            addCommandHandler.Handle(new AddOrderCommand()
+            {
+                OrderId = newOrderGuid,
+                Status = OrderStatus.SentToKitchen,
+                CreationDate = DateTime.Now,
+                TableNumber = 1,
+                Dishes = new List<int> { 1, 2, 3 },
+                WaiterId = 1
+            });
+            var command = new ChangeOrderStatusCommand()
+            {
+                OrderId = newOrderGuid,
+                Status = OrderStatus.Preparing,
+                ChefId = 2
+            };
+
+            //Act
+            var result = changeOrderStatusCommandHandler.Handle(command);
+
+            //Assert
+            Assert.IsFalse(result.IsFaulted);
+        }
+
+        [TestMethod]
+        public void When_OrderStatusChanges_Expected_OrderRegisterWithStatusChanged()
+        {
+            //Arrange
+
+            // Set The Chef Busy
+            var addedOrderGuid = Guid.NewGuid();
+            addCommandHandler.Handle(new AddOrderCommand()
+            {
+                OrderId = addedOrderGuid,
+                Status = OrderStatus.SentToKitchen,
+                CreationDate = DateTime.Now,
+                TableNumber = 1,
+                Dishes = new List<int> { 1, 2, 3 },
+                WaiterId = 1
+            });
+
+            changeOrderStatusCommandHandler.Handle(new ChangeOrderStatusCommand()
+            {
+                OrderId = addedOrderGuid,
+                Status = OrderStatus.Preparing,
+                ChefId = 1
+            });
+           
+            var command = new ChangeOrderStatusCommand()
+            {
+                OrderId = addedOrderGuid,
+                Status = OrderStatus.Delivered,
+                ChefId = 2
+            };
+
+            //Act
+            var result = changeOrderStatusCommandHandler.Handle(command);
+
+            var order = applicationContext.Orders.Where(x => x.OrderId == command.OrderId).FirstOrDefault();
+
+            //Assert
+            Assert.IsTrue(order.Status == command.Status);
         }
     }
 }

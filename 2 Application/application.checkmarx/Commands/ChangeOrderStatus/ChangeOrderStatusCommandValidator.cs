@@ -11,10 +11,10 @@ namespace application.checkmarx.Commands
     {
         public ChangeOrderStatusCommandValidator(Order currentOrder, List<Order> chefOrders)
         {
-            RuleFor(p => p.ChefId).GreaterThan(0).WithMessage(MessageErrorConstants.CHEF_NOT_SET_MSG);
-
+            
             //Business Rules
-            RuleFor(p => IsChefBusy(p.Status,chefOrders)).Equal(true).WithMessage(MessageErrorConstants.CHEF_IS_BUSY_MSG);
+            RuleFor(p => IsChefIdSet(p.Status, currentOrder.ChefId)).Equal(false).WithMessage(MessageErrorConstants.CHEF_NOT_SET_MSG);
+            RuleFor(p => IsChefBusy(p.Status,chefOrders)).Equal(false).WithMessage(MessageErrorConstants.CHEF_IS_BUSY_MSG);
         }
 
         private bool IsChefBusy(OrderStatus newStatus, List<Order> chefOrders)
@@ -22,6 +22,16 @@ namespace application.checkmarx.Commands
             if(newStatus == OrderStatus.Preparing) {
                 var chefIsBusy = chefOrders.Where(x => x.Status == OrderStatus.Preparing).Count();
                 return chefIsBusy > 0;
+            }
+
+            return false;
+        }
+
+        private bool IsChefIdSet(OrderStatus newStatus, int id)
+        {
+            if (newStatus != OrderStatus.Preparing)
+            {
+                return id == 0;
             }
 
             return false;

@@ -24,10 +24,11 @@ namespace application.checkmarx.Commands
 
         public async Task Handle(ChangeOrderStatusCommand command)
         {
-            var orders = _context.Orders.Where(x => x.ChefId == command.ChefId).ToList();
+            var orders = _context.Orders.ToList();
+            var chefOrdes = orders.Where(x => x.ChefId == command.ChefId).ToList();
             var currentOrder = orders.Where(x => x.OrderId.ToString() == command.OrderId.ToString()).FirstOrDefault();
-
-            var validator = new ChangeOrderStatusCommandValidator(currentOrder, orders);
+            currentOrder.ChefId = command.ChefId;
+            var validator = new ChangeOrderStatusCommandValidator(currentOrder, chefOrdes);
 
             ValidationResult results = validator.Validate(command);
             bool validationSucceeded = results.IsValid;
@@ -42,6 +43,7 @@ namespace application.checkmarx.Commands
 
             if (currentOrder!= null)
             {
+               
                 currentOrder.Status = command.Status;
                 _context.Orders = orders;
                 if (currentOrder.Status == OrderStatus.Preparing) {

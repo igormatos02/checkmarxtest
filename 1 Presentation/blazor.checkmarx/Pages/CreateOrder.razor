@@ -1,15 +1,18 @@
 ﻿@page "/CreateOrder"
+@using application.checkmarx.Commands
 @using application.checkmarx.Commands.AddOrder
 @using application.checkmarx
 @using application.checkmarx.Queries
 @using application.checkmarx.DisplayModels;
 @using services.checkmarxs
 @using crosscutting.checkmarx.Enums
+@inject ICommandHandler<ChangeOrderStatusCommand> changeOrderStatusHandler
 @inject ICommandHandler<AddOrderCommand> addCommandHandler
 @inject IQueryHandler<GetDishesQuery> getDishesQuery
 @inject IQueryHandler<GetChefsQuery>  getChefsQuery
 @inject IQueryHandler<GetWaitersQuery>  getWaitersQuery
 @inject IQueryHandler<GetOrderQueueQuery> getOrderQuery
+@inject IQueryHandler<GetBillQuery> getBillQuery
 @inject IRabbitMQService RabbitMQService
 <h1>Create Order Screen</h1>
 
@@ -50,7 +53,7 @@
 
 <table>
     <tr>
-        <td style="width:600px;" valign="top">
+        <td style="width:800px;" valign="top">
             @if (currentOrder.WaiterId > 0 && currentOrder.TableNumber > 0) {
             <table>
                 <tr>
@@ -98,7 +101,7 @@
                         <tr>
                             <td>Table Number</td>
                             <td>Date</td>
-                             <td>Status</td>
+                            <td>Status</td>
                         </tr>
                             @foreach (var d in orders)
                             {
@@ -107,7 +110,12 @@
                                     <td>@order.TableNumber.ToString()</td>
                                     <td>@order.CreationDate.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>@order.Status.ToString()</td>
-                                    
+                                    <td>@if(order.Status==OrderStatus.ReadyToDeliver) {  
+                                        <button class="btn btn-primary" @onclick="()=>Deliver(order)">Deliver Order</button>
+                                         <button class="btn btn-success" @onclick="()=>PrintBill(order)">Print Bill</button>
+                                        }
+                                    </td>
+
                                 </tr>
                             }
                         </table>
@@ -115,6 +123,35 @@
         </td>
     </tr>
 </table>
+@if(currentBill!=null){
+<table>
+    <tr>
+        <td>
+            Waiter Id
+        </td>
+        <td>@currentBill.Waiter</td>
+    </tr>
+    <tr>
+        <td>
+            Chef Id
+        </td>
+        <td>@currentBill.Chef</td>
+    </tr>
+    <tr>
+          <td>
+           Date
+        </td>
+        <td>@currentBill.Date</td>
+    </tr>
+    <tr>
+          <td>
+           TOTAL
+        </td>
+        <td>@currentBill.Total</td>
+    </tr>
+</table>
+}
+
 <div class="badge bg-warning text-dark">@currentOrder.Validation</div>
 <ul id="receivedList" style="background-color:red; color:white"></ul>           
 @code {
@@ -123,7 +160,8 @@
     private IList<IResult> waiters;
     private IList<IResult> orders;
     private AddOrderCommand currentOrder;
-    
+    private BillDisplay currentBill;
+   
     protected override async Task OnInitializedAsync()
     {
         dishes = await getDishesQuery.Handle(new GetDishesQuery());
@@ -144,7 +182,29 @@
             Status = OrderStatus.None
         };
 
+
+    }
+
+    private async void PrintBill(OrderDisplay order)
+    {
+        var result = await getBillQuery.Handle(new GetBillQuery() { OrderId = order.OrderId });
+        var bill =  result.FirstOrDefault();
+        if (bill != null)
+            currentBill = (BillDisplay)bill;
+    }
+
+    private void Deliver(OrderDisplay order)
+    {
+
+        changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
+        {
+            OrderId = order.OrderId,
+            Status = OrderStatus.Closed,
+            ChefId = order.ChefId
+        });
+        order.Status = OrderStatus.Closed;
        
+
     }
 
     private void SaveOrder()
@@ -155,9 +215,9 @@
 
         if (saveResult.Status == TaskStatus.Faulted)
         {
-             currentOrder.Validation = saveResult.Exception.Message;
+            currentOrder.Validation = saveResult.Exception.Message;
         }
-        else { 
+        else {
 
             orders.Add(new OrderDisplay() {
                 OrderId = currentOrder.OrderId,
@@ -168,7 +228,7 @@
                 WaiterId=currentOrder.WaiterId
             });
             NewOrder();
-         }
+        }
         //RabbitMQService.Connect();
 
     }

@@ -51,7 +51,7 @@
                                     <td>@order.CreationDate.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>@order.Status.ToString()</td>
                                     <td>
-                                        @if (order.CreationDate == orders.Min(x => ((OrderDisplay)x).CreationDate) && order.Status==OrderStatus.SentToKitchen) { 
+                                        @if (order.Status==OrderStatus.SentToKitchen) { 
                                         <button  class="btn btn-primary" @onclick="()=>PrepareOrder(order)">Prepare</button>
                                         }
                                     </td>
@@ -96,7 +96,7 @@
                 </tr>
                  <tr>
                      @{
-                         var chief = chefs.Select(x => ((ChefDisplay)x)).Where(x => x.Id == chefId).FirstOrDefault();
+                         var chief = chefs.Select(x => ((ChefDisplay)x)).Where(x => x.Id == currentOrder.ChefId).FirstOrDefault();
                      }
                      @if (chief != null) { 
                     <td>Chef:</td>
@@ -119,7 +119,7 @@
     </tr>
 </table>
 }
-
+<div class="badge bg-warning text-dark">@validation</div>
 <ul id="orderList" style="background-color:red; color:white"></ul>                   
 
 
@@ -130,24 +130,36 @@
     private IList<IResult> waiters;
     private IList<IResult> dishes;
     private OrderDisplay currentOrder;
+    private string validation;
     private int chefId = 0;
     protected override async Task OnInitializedAsync()
     {
-        orders = await getOrderQuery.Handle(new GetOrderQueueQuery() {Status = OrderStatus.SentToKitchen});
+        Refresh();
         chefs = await getChefsQuery.Handle(new GetChefsQuery());
         dishes = await getDishesQuery.Handle(new GetDishesQuery());
         waiters = await getWaitersQuery.Handle(new GetWaitersQuery());
+       
     }
 
     private void PrepareOrder(OrderDisplay order)
     {
-        order.Status = OrderStatus.Preparing;
-        currentOrder = order;
-        changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
+
+        var saveResult = changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
         {
             OrderId = order.OrderId,
-            Status = OrderStatus.Preparing
+            Status = OrderStatus.Preparing,
+            ChefId = chefId
         });
+        if (saveResult.Status == TaskStatus.Faulted)
+        {
+            validation = saveResult.Exception.Message;
+        }
+        else
+        {
+            order.Status = OrderStatus.Preparing;
+            currentOrder = order;
+            validation = string.Empty;
+        }
     }
 
     private void DeliverOrder()
@@ -156,14 +168,21 @@
         changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
         {
             OrderId = currentOrder.OrderId,
-            Status = currentOrder.Status
+            Status = currentOrder.Status,
+            ChefId = chefId
         });
+        currentOrder = null;
     }
 
     public async Task Refresh()
     {
-        orders = await getOrderQuery.Handle(new GetOrderQueueQuery() {Status = OrderStatus.SentToKitchen});
-        StateHasChanged();
+        if (chefId != 0)
+        {
+            orders = await getOrderQuery.Handle(new GetOrderQueueQuery() { Status = OrderStatus.SentToKitchen });
+            var preparingOrders = await getOrderQuery.Handle(new GetOrderQueueQuery() { Status = OrderStatus.Preparing });
+            var currentOrder = preparingOrders.Select(x => ((OrderDisplay)x)).Where(x => x.ChefId == chefId && OrderStatus.Preparing == x.Status).FirstOrDefault();
+            StateHasChanged();
+        }
     }
-   
+
 }

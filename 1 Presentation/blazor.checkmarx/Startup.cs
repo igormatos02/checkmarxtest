@@ -41,7 +41,9 @@ namespace blazor.checkmarx
             services.AddSignalR();
             services.AddSingleton<IApplicationContext, ApplicationContext>();
             services.AddSingleton<ICommandHandler<AddOrderCommand>, AddOrderCommandHandler>();
+            services.AddSingleton<ICommandHandler<AddChefCommand>, AddChefCommandHandler>();
             services.AddSingleton<ICommandHandler<ChangeOrderStatusCommand>, ChangeOrderStatusCommandHandler>();
+            services.AddSingleton<IQueryHandler<GetBillQuery>, GetBillQueryHandler>();
             services.AddSingleton<IQueryHandler<GetDishesQuery>, GetDishesQueryHandler>();
             services.AddSingleton<IQueryHandler<GetOrderQueueQuery>, GetOrderQueueQueryHandler>();
             services.AddSingleton<IQueryHandler<GetChefsQuery>, GetChefsQueryHandler>();
