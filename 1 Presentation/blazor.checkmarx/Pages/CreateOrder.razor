@@ -112,6 +112,10 @@
                                     <td>@order.Status.ToString()</td>
                                     <td>@if(order.Status==OrderStatus.ReadyToDeliver) {  
                                         <button class="btn btn-primary" @onclick="()=>Deliver(order)">Deliver Order</button>
+                                     
+                                        }
+                                    @if(order.Status==OrderStatus.Delivered) {  
+                                      
                                          <button class="btn btn-success" @onclick="()=>PrintBill(order)">Print Bill</button>
                                         }
                                     </td>

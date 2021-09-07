@@ -135,7 +135,7 @@
     protected override async Task OnInitializedAsync()
     {
         Refresh();
-        chefs = await getChefsQuery.Handle(new GetChefsQuery());
+      
         dishes = await getDishesQuery.Handle(new GetDishesQuery());
         waiters = await getWaitersQuery.Handle(new GetWaitersQuery());
        
@@ -176,6 +176,7 @@
 
     public async Task Refresh()
     {
+          chefs = await getChefsQuery.Handle(new GetChefsQuery());
         if (chefId != 0)
         {
             orders = await getOrderQuery.Handle(new GetOrderQueueQuery() { Status = OrderStatus.SentToKitchen });
