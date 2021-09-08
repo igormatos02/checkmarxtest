@@ -203,10 +203,10 @@
         changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
         {
             OrderId = order.OrderId,
-            Status = OrderStatus.Closed,
+            Status = OrderStatus.Delivered,
             ChefId = order.ChefId
         });
-        order.Status = OrderStatus.Closed;
+        order.Status = OrderStatus.Delivered;
        
 
     }

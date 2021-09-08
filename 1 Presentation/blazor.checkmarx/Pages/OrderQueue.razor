@@ -16,7 +16,7 @@
 <table>
     <tr>
         <td>Select a Chef </td>
-        <td> <select class="form-control"  @bind="chefId">
+        <td> <select class="form-control"  @onchange="chefChanged">
                 @if (chefs != null) {
                     @foreach (var d in chefs)
                     {   
@@ -135,15 +135,21 @@
     protected override async Task OnInitializedAsync()
     {
         Refresh();
-      
+
         dishes = await getDishesQuery.Handle(new GetDishesQuery());
         waiters = await getWaitersQuery.Handle(new GetWaitersQuery());
-       
-    }
 
+    }
+     void chefChanged(ChangeEventArgs e)
+    {
+        currentOrder = null;
+        chefId  = Convert.ToInt32( e.Value.ToString());
+       Refresh();
+    }
+    
     private void PrepareOrder(OrderDisplay order)
     {
-
+         validation = string.Empty;
         var saveResult = changeOrderStatusHandler.Handle(new ChangeOrderStatusCommand()
         {
             OrderId = order.OrderId,
@@ -157,8 +163,9 @@
         else
         {
             order.Status = OrderStatus.Preparing;
+            order.ChefId = chefId;
             currentOrder = order;
-            validation = string.Empty;
+           
         }
     }
 
@@ -176,14 +183,29 @@
 
     public async Task Refresh()
     {
-          chefs = await getChefsQuery.Handle(new GetChefsQuery());
+        chefs = await getChefsQuery.Handle(new GetChefsQuery());
+        validation = string.Empty;
         if (chefId != 0)
         {
             orders = await getOrderQuery.Handle(new GetOrderQueueQuery() { Status = OrderStatus.SentToKitchen });
             var preparingOrders = await getOrderQuery.Handle(new GetOrderQueueQuery() { Status = OrderStatus.Preparing });
-            var currentOrder = preparingOrders.Select(x => ((OrderDisplay)x)).Where(x => x.ChefId == chefId && OrderStatus.Preparing == x.Status).FirstOrDefault();
-            StateHasChanged();
+            var order = preparingOrders.Select(x => ((OrderDisplay)x)).Where(x => x.ChefId == chefId && OrderStatus.Preparing == x.Status).FirstOrDefault();
+            if (order != null) {            
+                currentOrder = new OrderDisplay()
+                {
+                    ChefId = order.ChefId,
+                    Status = order.Status,
+                    CreationDate = order.CreationDate,
+                    Dishes = order.Dishes,
+                    TableNumber = order.TableNumber,
+                    OrderId = order.OrderId,
+                    WaiterId = order.WaiterId
+                };
+                }
+
+          
         }
+          StateHasChanged();
     }
 
 }
